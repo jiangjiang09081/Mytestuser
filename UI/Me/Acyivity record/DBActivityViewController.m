@@ -44,6 +44,11 @@
     UIBarButtonItem *item = [[UIBarButtonItem alloc] initWithCustomView:backButton];
     UIBarButtonItem *item1 = [[UIBarButtonItem alloc] initWithCustomView:labelButton];
     self.navigationItem.leftBarButtonItems = @[item,item1];
+    
+    UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(50, 50, 100, 50)];
+    label.backgroundColor = [UIColor greenColor];
+    label.text = @"hello";
+    [self.view addSubview:label];
     // Do any additional setup after loading the view.
 }
 
