@@ -21,7 +21,6 @@ typedef void(^Filure)(NSURLSessionDataTask *task, NSError *error);
 
 @property (nonatomic, strong) AFHTTPSessionManager *manager;
 
-
 - (void)postWithUrl:(NSString *)url
        AndParameter:(id)parameter
              finish:(void(^)(id, NSError *))finished;

@@ -28,6 +28,7 @@ typedef enum titleType{
 }TitleType;
 
 static NSString *cellID = @"cellID";
+
 @interface CommodityViewController ()<TitleViewDelegate,UIScrollViewDelegate,UITableViewDataSource,UITableViewDelegate,SDCycleScrollViewDelegate>
 {
 
@@ -94,8 +95,6 @@ static NSString *cellID = @"cellID";
     [self.view addSubview:self.bodyScrollView];
     
     [self getDataFromNetWork];
-    
-   
 }
 
 //获取头视图
@@ -105,6 +104,7 @@ static NSString *cellID = @"cellID";
         if ([responseObject isKindOfClass:[NSDictionary class]]) {
             self.sliderArr = [responseObject objectForKey:@"data"];
         }
+        
         [self setContent];
     }];
     
