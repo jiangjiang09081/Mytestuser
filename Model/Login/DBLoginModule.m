@@ -123,4 +123,29 @@
         finished (responseObject, error);
     }];
 }
+
+
+- (void)getTokenFromThirdWithUrl:(NSString *)url finish:(void (^)(id responseObject, NSError *error))finished{
+
+    [self postWithUrl:url AndParameter:nil finish:^(id responseObject, NSError *error) {
+        
+        finished (responseObject , error);
+    }];
+}
+/**
+ *  获取微信用户信息
+ */
+
+- (void)getWeiChatUserInfoWithAccessToken:(NSString *)accesstoken openId:(NSString *)openId finishen:(void (^)(id, NSError *))finished{
+    NSMutableDictionary *parameters = [NSMutableDictionary dictionaryWithCapacity:10];
+    [parameters setObject:accesstoken forKey:@"access_token"];
+    [parameters setObject:openId forKey:@"openid"];
+    [self GetWithUrl:@"https://api.weixin.qq.com/sns/userinfo?" AndParameter:parameters success:^(NSURLSessionDataTask *task, id responseObject) {
+        finished  (responseObject, nil);
+    } failuer:^(NSURLSessionDataTask *task, NSError *error) {
+        finished (error, nil);
+    }];
+    
+}
+
 @end

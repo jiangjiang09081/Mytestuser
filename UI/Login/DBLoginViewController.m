@@ -16,7 +16,17 @@
 #import "MeViewController.h"
 #import "DBDataSettingViewController.h"
 #import "DBShoppingCart.h"
-@interface DBLoginViewController ()<UITextFieldDelegate,UIGestureRecognizerDelegate,UIScrollViewDelegate>
+#import "MBProgressHUD.h"
+
+#import "WXApi.h"
+#import "WXApiObject.h"
+#import "UMSocial.h"
+#import "UMSocialControllerService.h"
+#import "UMSocialSnsPlatformManager.h"
+#import "UMSocialConfig.h"
+#import "UMSocialAccountManager.h"
+#import "UMSocialData.h"
+@interface DBLoginViewController ()<UITextFieldDelegate,UIGestureRecognizerDelegate,UIScrollViewDelegate,WXApiDelegate>
 @property (nonatomic, strong) UIImageView *logoImageView;
 @property (nonatomic, strong) UIScrollView *bodyScrollView;
 @property (nonatomic, strong) UITextField *usernameTextField;
@@ -26,7 +36,7 @@
 @property (nonatomic, assign) BOOL LoginInProgress;
 @property (nonatomic, strong) NSString *oauthId;
 @property (nonatomic, strong) NSMutableDictionary *userInfo;
-
+@property (nonatomic, strong) MBProgressHUD *mbProgressHud;
 @end
 
 @implementation DBLoginViewController
@@ -54,8 +64,9 @@
 }
 - (void)viewDidLoad {
     [super viewDidLoad];
+    self.view.backgroundColor = [UIColor whiteColor];
     
-      [self.navigationController.navigationBar setBarTintColor:[UIColor colorWithRed:0.164 green:0.657 blue:0.915 alpha:1.000]];
+    [self.navigationController.navigationBar setBarTintColor:[UIColor colorWithRed:0.164 green:0.657 blue:0.915 alpha:1.000]];
     [self addLogView];
     
     // Do any additional setup after loading the view.
@@ -142,8 +153,8 @@
     [_logButton addTarget:self action:@selector(login) forControlEvents:UIControlEventTouchUpInside];
     [_bodyScrollView addSubview:_logButton];
     
-    UIView *secondView  = [[UIView alloc]initWithFrame:CGRectMake(10, _bodyScrollView.frame.size.height / 2, MainWidth - 20, 130)];
-    secondView.clipsToBounds = YES;
+    UIView *secondView  = [[UIView alloc]initWithFrame:CGRectMake(10, _bodyScrollView.frame.size.height / 2, MainWidth - 20, 40)];
+    secondView.userInteractionEnabled = YES;
     secondView.backgroundColor = [UIColor clearColor];
     
     UILabel *label = [[UILabel alloc]initWithFrame:CGRectMake(0, 10, secondView.frame.size.width, 30)];
@@ -160,11 +171,12 @@
         UIButton *thirdPartyButton = [UIButton buttonWithType:UIButtonTypeCustom];
         thirdPartyButton.frame = CGRectMake((i * 2 + 1)*buttonWidth, _bodyScrollView.frame.size.height / 2 + 50, buttonWidth, buttonHeight);
         thirdPartyButton.backgroundColor = [UIColor clearColor];
-        UILabel *thirdlabel = [[UILabel alloc]initWithFrame:CGRectMake((i * 2 + 1)*buttonWidth, _bodyScrollView.frame.size.height/2 + 55 +buttonWidth, buttonWidth + 10, 40)];
+        thirdPartyButton.clipsToBounds = YES;
+        thirdPartyButton.tag = i + 50;
+        UILabel *thirdlabel = [[UILabel alloc]initWithFrame:CGRectMake((i * 2 + 1)*buttonWidth, _bodyScrollView.frame.size.height/2 + 55 + buttonHeight, buttonWidth + 10, 40)];
         if (i == 0) {
             [thirdPartyButton setBackgroundImage:[UIImage imageNamed:@"facebook"] forState:UIControlStateNormal];
             thirdlabel.text = @"facebook";
-            
         }else if (i == 1){
             [thirdPartyButton setBackgroundImage:[UIImage imageNamed:@"google"] forState:UIControlStateNormal];
             thirdlabel.text = @"google";
@@ -175,7 +187,6 @@
         thirdlabel.font = [UIFont systemFontOfSize:12];
         thirdlabel.alpha = 0.5;
         
-        thirdPartyButton.tag = i;
         [thirdPartyButton addTarget:self action:@selector(gotoThirdPartyView:) forControlEvents:UIControlEventTouchUpInside];
         [_bodyScrollView addSubview:thirdPartyButton];
         [_bodyScrollView addSubview:thirdlabel];
@@ -200,11 +211,11 @@
         [self showAlertViewWithMessage:@"请输入密码"];
         return;
      }else{
-     
+         [[WrappedHUDHelper sharedHelper] showHUDInView:self.view withTitle:@"正在登录"];
          [_HTSET.loginModule loginWithemail:_usernameTextField.text AndPassword:_passwordTextField.text finish:^(NSString *message) {
             
              if ([message isEqualToString:@"success"] == YES) {
-                 
+                 [[WrappedHUDHelper sharedHelper] hideHUD];
                  
                  MeViewController *me = [[MeViewController alloc] init];
                  
@@ -258,11 +269,83 @@
     
     
 }
-
+//第三方登录
 - (void)gotoThirdPartyView:(UIButton *)button{
-    
+  
+    switch (button.tag - 50) {
+        case 0:{
+        
+            [self sendAuthRequest];
+        }
+            break;
+        case 1:{
+            [UMSocialData setAppKey:@"2238228476"];
+            UMSocialSnsPlatform *snsPlatform = [UMSocialSnsPlatformManager getSocialPlatformWithName:UMShareToSina];
+            snsPlatform.loginClickHandler(self, [UMSocialControllerService defaultControllerService], YES, ^(UMSocialResponseEntity *response){
+            
+                
+            });
+        }
+            break;
+            
+        default:
+            break;
+    }
     
 }
+
+- (void)sendAuthRequest{
+    //检查微信是否被用户安装
+    if ([WXApi isWXAppInstalled]) {
+    
+        SendAuthReq *req = [[SendAuthReq alloc] init];
+        req.scope = @"snsapi_userinfo";
+        req.state = @"0744";
+        [WXApi sendReq:req];
+    }else{
+    
+        [self setupAlertController];
+    }
+
+}
+//根据返回信息获取用户微信token
+- (void)onResp:(BaseResp *)resp{
+
+    if (resp.errCode == 0) {
+        SendAuthResp *sendResp = (SendAuthResp *)resp;
+        NSString *url = [NSString stringWithFormat:@"https://api.weixin.qq.com/sns/oauth2/access_token?appid=wx76f1fe821ac5c89e&secret=c1c252e6ac0e15d51204eb0e14d84b19&code=%@&grant_type=authorization_code",sendResp.code];
+        [_HTSET.loginModule getTokenFromThirdWithUrl:url finish:^(id responseObject, NSError *error) {
+            if (responseObject && [responseObject isKindOfClass:[NSDictionary class]]) {
+                NSString *accessToken = [responseObject objectForKey:@"access_token"];
+                NSString *openId = [responseObject objectForKey:@"openid"];
+                [self getWeiChatUserInfoWithAccessToken:accessToken openId:openId];
+            }
+        }];
+    }
+}
+
+//获取微信的个人信息
+- (void)getWeiChatUserInfoWithAccessToken:(NSString *)accesstoken openId:(NSString *)openId{
+
+    [_HTSET.loginModule getWeiChatUserInfoWithAccessToken:accesstoken openId:openId finishen:^(id responseObject, NSError *error) {
+        if (responseObject && [responseObject isKindOfClass:[NSDictionary class]]) {
+//            NSString *userName = [responseObject objectForKey:@"nickname"];
+//            NSString *userId = [responseObject objectForKey:@"unionid"];
+            
+        }
+    }];
+}
+
+//设置提示未安装微信
+- (void)setupAlertController{
+
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"温馨提示" message:@"请先安装微信客户端" preferredStyle:UIAlertControllerStyleAlert];
+    UIAlertAction *action = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:nil];
+    [alert addAction:action];
+    [self presentViewController:alert animated:YES completion:nil];
+}
+
+
 //忘记密码的点击事件
 - (void)onClick:(UIButton *)button{
     
@@ -281,6 +364,7 @@
     
 }
 - (void)didReceiveMemoryWarning {
+    
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }

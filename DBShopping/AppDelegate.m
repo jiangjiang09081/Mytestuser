@@ -8,9 +8,14 @@
 
 #import "AppDelegate.h"
 #import "DBLoginModule.h"
-@interface AppDelegate ()
-
-
+#import "WXApi.h"
+#import "UMSocialSnsService.h"
+#import "UMSocialData.h"
+#import "UMSocialConfig.h"
+#import "UMSocialSnsPlatformManager.h"
+#import "UMSocialQQHandler.h"
+#import "UMSocialWechatHandler.h"
+@interface AppDelegate ()<UIApplicationDelegate>
 
 @end
 
@@ -33,8 +38,13 @@
     NSURLCache *cache = [[NSURLCache alloc] initWithMemoryCapacity:4*1024*1024 diskCapacity:20*1024*1024 diskPath:nil];
     [NSURLCache setSharedURLCache:cache];
     
-    _setObject = [[DBSettingObject alloc]init];
+    /**
+     第三方登录
+     */
+    [WXApi registerApp:@"wx76f1fe821ac5c89e" withDescription:@"Wechat"];
+    [UMSocialConfig setSnsPlatformNames:@[UMShareToSina]];
     
+    _setObject = [[DBSettingObject alloc]init];
     
     //若用户已经存在,直接登录
     if (token && [token length] > 0) {
@@ -56,6 +66,20 @@
     
     // Override point for customization after application launch.
     return YES;
+}
+
+//微信返回第三方APP
+- (BOOL)application:(UIApplication *)application handleOpenURL:(NSURL *)url{
+        
+        return [WXApi handleOpenURL:url delegate:(id)self];
+  
+    return YES;
+}
+
+- (BOOL)application:(UIApplication *)app openURL:(NSURL *)url options:(NSDictionary<NSString *,id> *)options{
+
+
+    return [WXApi handleOpenURL:url delegate:(id)self];
 }
 
 - (void)applicationWillResignActive:(UIApplication *)application {

@@ -10,6 +10,7 @@
 #import "DBSettingObject.h"
 #import "DBUIObject.h"
 #import "DBUITheme.h"
+#import "MeViewController.h"
 @interface AppDelegate : UIResponder <UIApplicationDelegate>
 
 @property (strong, nonatomic) UIWindow *window;
@@ -17,6 +18,7 @@
 @property (nonatomic, strong) DBSettingObject *setObject;
 @property (nonatomic, strong) DBUIObject *uiObject;
 @property (nonatomic, strong) DBUITheme *uiTheme;
+@property (nonatomic, strong) MeViewController *me;
 
 @end
 

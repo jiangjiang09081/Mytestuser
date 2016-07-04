@@ -35,4 +35,14 @@
 
 - (void)finish:(void(^)(id responseObject, NSError *error))finished;
 
+
+/**
+ *  获取微信成功登录token
+ */
+- (void)getTokenFromThirdWithUrl:(NSString *)url finish:(void (^)(id, NSError *))finished;
+
+/**
+ *  获取微信用户信息
+ */
+- (void)getWeiChatUserInfoWithAccessToken:(NSString *)accesstoken openId:(NSString *)openId finishen:(void (^)(id responseObject, NSError *error))finished;
 @end

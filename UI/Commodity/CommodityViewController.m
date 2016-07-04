@@ -15,7 +15,7 @@
 #import "BLBaseUIHelper.h"
 #import "CommodityTableViewCell.h"
 #import "DBGoodSearchViewController.h"
-
+#import "MBProgressHUD.h"
 
 #define TableViewTag  50
 #define SDScrollViewTag 60
@@ -120,6 +120,7 @@ static NSString *cellID = @"cellID";
     for (NSDictionary *dic in _sliderArr) {
         
         if ([[dic objectForKey:@"img"] length] > 0) {
+            
             NSString *img = [baseUrl stringByAppendingString:[NSString stringWithFormat:@"Public%@",[dic objectForKey:@"img"]]];
             [images addObject:img];
             _images = images;
@@ -164,14 +165,11 @@ static NSString *cellID = @"cellID";
         [tableView registerClass:[CommodityTableViewCell class] forCellReuseIdentifier:cellID];
         
         [self.bodyScrollView addSubview:tableView];
-        
     }
 }
 
 //刷新视图
 - (void)refreshData:(NSInteger)I{
-    
-    [[WrappedHUDHelper sharedHelper]showHUDInView:self.view withTitle:@"正在加载"];
     
     UITableView *tableView = [self.bodyScrollView viewWithTag:I + TableViewTag];
     
@@ -183,6 +181,7 @@ static NSString *cellID = @"cellID";
 #pragma mark 网络请求
 - (void)loadDataWithType:(TitleType)type{
     
+    [[WrappedHUDHelper sharedHelper]showHUDInView:self.view withTitle:@"正在加载"];
     NSMutableDictionary *parameter = [NSMutableDictionary dictionaryWithDictionary:@{@"p":@(_page[type])}];
     
     NSArray *types = @[@"hot",@"new",@"complete",@"history"];
@@ -200,6 +199,7 @@ static NSString *cellID = @"cellID";
             [self.dataSourse[type] addObjectsFromArray:[responseObject objectForKey:@"data"]];
             
             [tableView reloadData];
+            [tableView.pullToRefreshView stopAnimating];
         }
 
     }];
