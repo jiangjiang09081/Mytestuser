@@ -14,4 +14,8 @@
 
 - (void)showAlertViewWithMessage:(NSString *)message;
 
+- (NSString *)currentDate;
+
+- (NSString *)lastRefreshDate;
+
 @end

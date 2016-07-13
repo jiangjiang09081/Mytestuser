@@ -45,15 +45,34 @@
 }
 
 - (void)showAlertViewWithMessage:(NSString *)message{
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:nil message:message preferredStyle:UIAlertControllerStyleAlert];
+    UIAlertAction *action = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:nil];
+    [alert addAction:action];
+    [self presentViewController:alert animated:YES completion:nil];
     
-    UIAlertView *alertView = [[UIAlertView alloc]initWithTitle:message message:nil delegate:nil cancelButtonTitle:@"确定" otherButtonTitles: nil];
+//    UIAlertView *alertView = [[UIAlertView alloc]initWithTitle:message message:nil delegate:nil cancelButtonTitle:@"确定" otherButtonTitles: nil];
     
-    [alertView show];
+//    [alertView show];
 }
+
+- (NSString *)currentDate{
+    
+    NSDate *date = [NSDate date];
+    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+    [dateFormatter setDateFormat:@"HH:mm:ss"];
+    return [dateFormatter stringFromDate:date];
+}
+
+- (NSString *)lastRefreshDate{
+    NSString *currentDate = [self currentDate];
+    return [NSString stringWithFormat:@"上次刷新:%@", currentDate];
+}
+
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
+
 
 /*
 #pragma mark - Navigation

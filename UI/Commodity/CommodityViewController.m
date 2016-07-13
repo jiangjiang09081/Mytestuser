@@ -71,7 +71,7 @@ static NSString *cellID = @"cellID";
     
     [self createTitle];
     [self createScrollView];
-  
+    [self.bodyScrollView.pullToRefreshView performSelector:@selector(stopAnimating) withObject:nil afterDelay:0.2];
     // Do any additional setup after loading the view.
 }
 
@@ -91,10 +91,14 @@ static NSString *cellID = @"cellID";
     self.bodyScrollView.delegate = self;
     self.bodyScrollView.pagingEnabled = YES;
     self.bodyScrollView.contentSize = CGSizeMake(self.bodyScrollView.frame.size.width * 4, self.bodyScrollView.frame.size.height);
-    
     [self.view addSubview:self.bodyScrollView];
     
-    [self getDataFromNetWork];
+//    __weak typeof (self) weakSelf = self;
+//    [_bodyScrollView addPullToRefreshWithActionHandler:^{
+    
+        [self getDataFromNetWork];
+//    }];
+    
 }
 
 //获取头视图
@@ -137,7 +141,7 @@ static NSString *cellID = @"cellID";
 
 //创建每个tableView
 - (void)createTableView{
-
+    
     self.dataSourse = [NSMutableArray array];
     
     for (int i = 0; i < 4; i++) {
@@ -173,14 +177,21 @@ static NSString *cellID = @"cellID";
     
     UITableView *tableView = [self.bodyScrollView viewWithTag:I + TableViewTag];
     
-    [tableView.pullToRefreshView startAnimating];
+//    [tableView.pullToRefreshView startAnimating];
+    __weak typeof (self) weakSelf = self;
+     [tableView addPullToRefreshWithActionHandler:^{
+        
+        [weakSelf loadDataWithType:(TitleType)(I)];
+        
+    }];
     
-    [self loadDataWithType:(TitleType)(I)];
+   
 }
 
 #pragma mark 网络请求
 - (void)loadDataWithType:(TitleType)type{
     
+   
     [[WrappedHUDHelper sharedHelper]showHUDInView:self.view withTitle:@"正在加载"];
     NSMutableDictionary *parameter = [NSMutableDictionary dictionaryWithDictionary:@{@"p":@(_page[type])}];
     
@@ -193,12 +204,15 @@ static NSString *cellID = @"cellID";
         [[WrappedHUDHelper sharedHelper]hideHUD];
         
         UITableView *tableView = [self.bodyScrollView viewWithTag:type +TableViewTag];
-        
+         [tableView.pullToRefreshView startAnimating];
         if (responseObject && [responseObject isKindOfClass:[NSDictionary class]]) {
             
             [self.dataSourse[type] addObjectsFromArray:[responseObject objectForKey:@"data"]];
             
             [tableView reloadData];
+            [tableView.pullToRefreshView stopAnimating];
+            [tableView.pullToRefreshView setSubtitle:[self lastRefreshDate] forState:SVPullToRefreshStateAll];
+        }else{
             [tableView.pullToRefreshView stopAnimating];
         }
 
@@ -226,10 +240,12 @@ static NSString *cellID = @"cellID";
 #pragma mark delegate
 
 - (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView{
+   
     if (self.bodyScrollView == scrollView) {
         NSInteger index = self.bodyScrollView.contentOffset.x/self.bodyScrollView.frame.size.width;
         //点击对应button
         [self.titleView clickButton:self.titleView.buttons[index]];
+       
     }
 }
 
