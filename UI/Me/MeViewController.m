@@ -376,7 +376,7 @@
 
 - (void)removeAllCatchResponse{
 
-    
+    [[WrappedHUDHelper sharedHelper] hideHUD];
 }
 
 - (void)viewDidLoad {
