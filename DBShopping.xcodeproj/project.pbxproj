@@ -1418,7 +1418,6 @@
 				TargetAttributes = {
 					EE1C6F581CA539D5005DF37A = {
 						CreatedOnToolsVersion = 7.2;
-						DevelopmentTeam = CASREXG5ZJ;
 					};
 					EE1C6F711CA539D5005DF37A = {
 						CreatedOnToolsVersion = 7.2;

@@ -223,7 +223,8 @@
     
                  [self getUserInfo];
                  
-                 [self.navigationController pushViewController:me animated:YES];
+//                 [self.navigationController pushViewController:me animated:YES];
+                 [_HTUI showTabBarVC];
                  
              }else{
                  

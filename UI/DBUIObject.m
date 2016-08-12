@@ -39,16 +39,18 @@
     }
     else{
         
-        if (_HTSET.loginModule.isUserLogin) {
+        if (!_HTSET.loginModule.isUserLogin) {
             
-          [_HTSET.loginModule finish:^(id responseObject, NSError *error) {
-              if ([responseObject isKindOfClass:[NSDictionary class]]) {
-                  
-              }
-          }];
+//          [_HTSET.loginModule finish:^(id responseObject, NSError *error) {
+//              if ([responseObject isKindOfClass:[NSDictionary class]]) {
+//                  
+//              }
+            [self showLoginView];
+//          }];
        }
-        
+        else{
         [self showTabBarVC];
+        }
     }
     [_window makeKeyAndVisible];
 }
